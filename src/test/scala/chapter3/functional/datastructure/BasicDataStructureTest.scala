@@ -87,4 +87,80 @@ class BasicDataStructureTest extends Specification {
       ListStruct.product2(ls) mustEqual 48
     }
   }
+
+  "length" should {
+    "return length of list" in {
+      val ls = ListStruct(2, 4, 6)
+      ListStruct.length(ls) mustEqual 3
+    }
+  }
+
+  "sumUsingFoldLeft" should {
+    "add all the elements of list" in {
+      val ls = ListStruct(1, 4, 6, 9)
+      ListStruct.sumUsingFoldLeft(ls) mustEqual 20
+    }
+  }
+
+  "productUsingFoldLeft" should {
+    "multiply all the elements of list" in {
+      val ls = ListStruct(2, 4, 6)
+      ListStruct.productUsingFoldLeft(ls) mustEqual 48
+    }
+  }
+
+  "lengthUsingFoldLeft" should {
+    "return length of list" in {
+      val ls = ListStruct(2, 4, 6)
+      ListStruct.lengthUsingFoldLeft(ls) mustEqual 3
+    }
+  }
+
+  "reverse" should {
+    "return reverse of list" in {
+      val ls = ListStruct(2, 4, 6)
+      ListStruct.reverse(ls) mustEqual ListStruct(6, 4, 2)
+    }
+  }
+
+  "appendUsingFoldRight" should {
+    "combine the two lists" in {
+      ListStruct.appendUsingFoldRight(ListStruct(1, 2), ListStruct(3, 4)) mustEqual ListStruct(1, 2, 3, 4)
+    }
+  }
+
+  "concatUsingFoldRight" should {
+    "combine the lists into single" in {
+      val ls = ListStruct[ListStruct[Int]](ListStruct(1, 2), ListStruct(3, 4), ListStruct(7, 9))
+      ListStruct.concatUsingFoldRight(ls) mustEqual ListStruct(1, 2, 3, 4, 7, 9)
+    }
+  }
+
+  "addOneToElement" should {
+    "add 1 to each element of list" in {
+      val ls = ListStruct(2, 4, 6)
+      ListStruct.addOneToElement(ls) mustEqual ListStruct(3, 5, 7)
+    }
+  }
+
+  "doubleToString" should {
+    "convert element of list to String" in {
+      val ls = ListStruct(2.0, 4.2, 6.4)
+      ListStruct.doubleToString(ls) mustEqual ListStruct("2.0", "4.2", "6.4")
+    }
+  }
+
+  "map" should {
+    "apply function on each element of list" in {
+      val ls = ListStruct(2.0, 4.2, 6.4)
+      ListStruct.doubleToString(ls) mustEqual ListStruct("2.0", "4.2", "6.4")
+    }
+  }
+
+  "filter" should {
+    "remove element returning false for predicate function" in {
+      val ls = ListStruct(2, 5, 8, 6, 3)
+      ListStruct.filter(ls)(x => x % 2 == 0) mustEqual ListStruct(2, 8, 6)
+    }
+  }
 }

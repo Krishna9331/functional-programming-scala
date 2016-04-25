@@ -138,6 +138,11 @@ object ListStruct {
     * where apart from operator and return type everything is same.
     *
     * To get rid of duplication we can create a separate function and extract the common code.
+    *
+    * Interesting thing here is, foldRight is not recursive, which might led us to stack overflow exception for the
+    * very large list. It is not possible to write fold right in tail recursive was because, it starts from tail of
+    * the list and travers to head. In scala list is implemented as singly liked list where tail do not have any info
+    * about head, hence it has to recurse from head to tail and the start evaluation after reaching the tail.
     */
 
   def foldRight[A, B](as: ListStruct[A], z: B)(f: (A, B) => B): B =
@@ -153,4 +158,73 @@ object ListStruct {
 
   def product2(as: ListStruct[Int]) =
     foldRight(as, 1)(_ * _)
+
+  def length[A](as: ListStruct[A]): Int =
+    foldRight(as, 0)((_, acc) => acc + 1)
+
+  /**
+    * Here is the cool thing about fold left which is tail recursive and will work fine even for the larger lists.
+    */
+  @tailrec
+  def foldLeft[A, B](as: ListStruct[A], z: B)(f: (B, A) => B): B = as match {
+    case Nil => z;
+    case Cons(x, xs) => foldLeft(xs, f(z, x))(f)
+  }
+
+  def sumUsingFoldLeft(as: ListStruct[Int]) =
+    foldLeft(as, 0)(_ + _)
+
+  def productUsingFoldLeft(as: ListStruct[Int]) =
+    foldLeft(as, 1)(_ * _)
+
+  def lengthUsingFoldLeft(as: ListStruct[Int]) =
+    foldLeft(as, 0)((acc, h) => acc + 1)
+
+  def reverse[A](as: ListStruct[A]): ListStruct[A] =
+    foldLeft(as, ListStruct[A]())((acc, h) => Cons(h, acc))
+
+  def foldLeftViaFoldRight[A, B](as: ListStruct[A], z: B)(f: (B, A) => B): B =
+    foldRight(as, (b: B) => b)((a, g) => b => g(f(b, a)))(z)
+
+  def foldRightViaFoldLeft[A, B](as: ListStruct[A], z: B)(f: (A, B) => B): B =
+    foldLeft(reverse(as), z)((b, a) => f(a, b))
+
+  def appendUsingFoldRight[A](a1: ListStruct[A], a2: ListStruct[A]): ListStruct[A] =
+    foldRight(a1, a2)(Cons(_, _))
+
+  /*
+ Since `append` takes time proportional to its first argument, and this first argument never grows because of the
+ right-associativity of `foldRight`, this function is linear in the total length of all lists.
+ */
+  def concatUsingFoldRight[A](as: ListStruct[ListStruct[A]]): ListStruct[A] =
+    foldRight(as, Nil: ListStruct[A])(append)
+
+  /**
+    * The foldLeft takes the function as f(B, A) which is reversed hence if we try to do add one using fold left it will
+    * result as below:
+    * say list is {2, 4, 6}
+    * ({2, 4, 6}, {})({}, 2)=>Cons(2+1, {}))
+    * ({4, 6}, {3})({3}, 4) =>Cons(4+1, {3}) which is going to consider 4+1 as header and newly created list will be {5, 3}
+    * as in fold left evaluation happens at each step cause of tail recursion.however, {3, 5} was expected.
+    *
+    * if we do the same using fold right below is the procedure:
+    * ({2, 4, 6}, {})(2, {})=>Cons(2+1, foldRight(Cons(4, Cons(6, Nil))))
+    * Cons(2+1, Cons(4+1, foldRight(Cons(6, Nil)))))
+    * Since evaluation happens once it does reach the last element so the List will be created in expected order.
+    */
+  def addOneToElement(as: ListStruct[Int]): ListStruct[Int] =
+  //    foldLeft(as, ListStruct[Int]())((acc, h) => Cons(h+1, acc))
+    foldRight(as, ListStruct[Int]())((h, t) => Cons(h + 1, t))
+
+  def doubleToString(as: ListStruct[Double]): ListStruct[String] =
+    foldRight(as, ListStruct[String]())((h, t) => Cons(h + "", t))
+
+  def map[A, B](as: ListStruct[A])(f: A => B): ListStruct[B] =
+    foldRight(as, ListStruct[B]())((h, t) => Cons(f(h), t))
+
+  def filter(as: ListStruct[Int])(f: Int => Boolean): ListStruct[Int] =
+    foldRight(as, ListStruct[Int]())((h, t) => f(h) match {
+      case true => Cons(h, t)
+      case false => t
+    })
 }
