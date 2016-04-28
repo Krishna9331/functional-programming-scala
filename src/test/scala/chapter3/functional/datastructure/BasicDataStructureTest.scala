@@ -163,4 +163,50 @@ class BasicDataStructureTest extends Specification {
       ListStruct.filter(ls)(x => x % 2 == 0) mustEqual ListStruct(2, 8, 6)
     }
   }
+
+  "flatMap" should {
+    "apply function and merge the list" in {
+      val ls = ListStruct(2, 5, 8)
+      ListStruct.flatMap(ls)(x => ListStruct(x, x)) mustEqual ListStruct(2, 2, 5, 5, 8, 8)
+    }
+  }
+
+  "filterUsingFlatMap" should {
+    "apply function and filter the list" in {
+      val ls = ListStruct(2, 5, 8, 6, 9, 12)
+      ListStruct.flatMap(ls)(x => if (x % 2 == 0) ListStruct(x) else ListStruct()) mustEqual ListStruct(2, 8, 6, 12)
+    }
+  }
+
+  "applyPairWise" should {
+    "apply addition on corresponding element on list" in {
+      val ls = ListStruct(2, 5, 8, 6, 9, 12)
+      val ls1 = ListStruct(1, 3, 5, 4, 6, 2)
+      ListStruct.applyPairWise(ls, ls1)((x, y) => x + y) mustEqual ListStruct(3, 8, 13, 10, 15, 14)
+    }
+  }
+
+  "applyPairWise" should {
+    "combine the corresponding element on list" in {
+      val ls = ListStruct(2, 5, 8)
+      val ls1 = ListStruct(1, 3, 5)
+      ListStruct.applyPairWise(ls, ls1)((x, y) => (x, y)) mustEqual ListStruct((2, 1), (5, 3), (8, 5))
+    }
+  }
+
+  "startWith" should {
+    "return true for sub sequence it starting with" in {
+      val ls = ListStruct(2, 5, 8, 7)
+      val ls1 = ListStruct(2, 5)
+      ListStruct.startsWith(ls, ls1) mustEqual true
+    }
+  }
+
+  "hasSubsequence" should {
+    "return true for valid sub sequence" in {
+      val ls = ListStruct(2, 5, 8, 6, 9, 11)
+      val ls1 = ListStruct(8, 6, 9)
+      ListStruct.hasSubsequence(ls, ls1) mustEqual true
+    }
+  }
 }

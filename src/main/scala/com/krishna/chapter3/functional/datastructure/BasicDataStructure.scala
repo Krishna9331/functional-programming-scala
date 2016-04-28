@@ -227,4 +227,30 @@ object ListStruct {
       case true => Cons(h, t)
       case false => t
     })
+
+  def flatMap[A, B](as: ListStruct[A])(f: A => ListStruct[B]): ListStruct[B] =
+    foldRight(as, ListStruct[B]())((h, t) => append(f(h), t))
+
+  def filterUsingFlatMap[A, B](as: ListStruct[A])(f: A => ListStruct[B]): ListStruct[B] =
+    flatMap(as)(f)
+
+  def applyPairWise[A, B, C](as: ListStruct[A], bs: ListStruct[B])(f: (A, B) => C): ListStruct[C] =
+    (as, bs) match {
+      case (Nil, _) => Nil
+      case (_, Nil) => Nil
+      case (Cons(h, t), Cons(h1, t1)) => Cons(f(h, h1), applyPairWise(t, t1)(f))
+    }
+
+  @tailrec
+  def startsWith[A](l: ListStruct[A], prefix: ListStruct[A]): Boolean = (l,prefix) match {
+    case (_,Nil) => true
+    case (Cons(h,t),Cons(h2,t2)) if h == h2 => startsWith(t, t2)
+    case _ => false
+  }
+  @tailrec
+  def hasSubsequence[A](sup: ListStruct[A], sub: ListStruct[A]): Boolean = sup match {
+    case Nil => sub == Nil
+    case _ if startsWith(sup, sub) => true
+    case Cons(h,t) => hasSubsequence(t, sub)
+  }
 }
